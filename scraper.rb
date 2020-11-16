@@ -9,57 +9,31 @@ require 'combine_pdf'
 
 class Scraper 
 
-  # def parse_pdf_file(pdf_file)
-  #   reader = PDF::Reader.new("./files/#{pdf_file}")
-  #   binding.pry
-  #   #self.populate_excel_template(reader)
-    
-  # end
+  def scrape_pdf_data(pdf_file)
+    #1. Split pdf into individual files
+    split_files = split_pdfs(pdf_file)
 
-  # def populate_excel_template(parsed_file)
-  #   excel = Spreadsheet.open "./files/benefix_excel.xls"
-  #   sheet1 = excel.worksheet 0
-  #   sheet1.each do |row|
-  #     #binding.pry
-  #   end
-  #   parsed_file.pages.each do |page|
-  #     #binding.pry
-  #     puts page
-  #   end
-  # end
+    #2. Convert to .txt
+    split_files.each do |split_file|
+      parse_pdf_file(pdf_file)
+    end
 
-  # def page_lines(parsed_file)
-  #   lines = []
+    #3. Parse data from txt file for data
+    parse_txt
 
-  #   parsed_file.pages
-  # end
+    #4. Write data to csv
+    write_to_csv
+
+    #5. Convert back to .xlsx
+
+  end
 
   def parse_pdf_file(pdf_file, noblank = true)
     file = Dir["files/#{pdf_file}"]
     Docsplit.extract_text(file, :ocr => false, :output => 'storage/text') 
-    #resulting_file = Docsplit.extract_text(file)
-    #pdf_to_text(resulting_file)
   end
 
-  # def read_text_file
-  #   my_array = [];
-  #   IO.foreach('storage/text/para05.txt') do |line|
-  #     my_array << line
-  #   end
-  #   binding.pry
-  # end
-
-  # def pdf_to_text
-  #   new_file = File.new('para06.txt')
-  #   new_text = []
-  #   binding.pry
-  #   new_file.readlines.each do |l|
-  #     binding.pry
-  #     l.chomp! if noblank
-  #   end
-  # end
-
-  def pdf_to_text
+  def parse_txt
     finalArr = []
     File.open('./storage/text/0.txt') do |f|
       f.each_line do |line|
@@ -87,12 +61,10 @@ class Scraper
   end
 
   def write_to_csv
-    column_to_add=["new value 1","new value 1"] 
-
     CSV.open('./files/data.csv', "wb") do |csv|
       csv << ["header 1", "header 2", "header 3", "header 4"]
         CSV.foreach('./files/data.csv', headers: true) do |row,index|
-            csv << [row[1], row[2] , row[3] , column_to_add[index]]
+            csv << []
         end
     end
   end
